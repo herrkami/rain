@@ -4,6 +4,7 @@ use std::f64::consts::PI;
 use std::fmt::Display;
 use std::{fs, path::Path};
 
+/// Directory used to store wavetable files generated during compile time
 const WAVETABLES_DIRECTORY: &str = "wavetables/";
 
 struct Wavetable<T> {

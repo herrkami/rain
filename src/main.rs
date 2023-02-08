@@ -2,36 +2,9 @@ use core::time::Duration;
 use rain::{
     linexp::LinExp,
     signalgen::{self, SignalGenerator},
-    wavetables::SINE_I32,
+    wavetables::{SINE_I16, SINE_I32},
 };
 use rodio::{source::Source, OutputStream};
-
-// impl Source for signalgen::SignalGenerator<i32> {
-//     fn channels(&self) -> u16 {
-//         return 1;
-//     }
-
-//     fn sample_rate(&self) -> u32 {
-//         return self.sample_rate;
-//     }
-
-//     fn current_frame_len(&self) -> Option<usize> {
-//         return None;
-//     }
-
-//     fn total_duration(&self) -> Option<Duration> {
-//     fn total_duration(&self) -> Option<Duration> {
-//         return None;
-//     }
-// }
-
-// impl Iterator for WavetableOscillator {
-//     type Item = f32;
-
-//     fn next(&mut self) -> Option<Self::Item> {
-//         return Some(self.get_sample());
-//     }
-// }
 
 fn main() {
     // print!("Hello World!\n");
@@ -45,12 +18,27 @@ fn main() {
     //     print!("{:?}\n", linexp.y(x));
     // }
 
-    let mut siggen = SignalGenerator::new();
-    siggen.set_wavetable(&SINE_I32);
-    siggen.set_freq(1);
+    let mut siggen = SignalGenerator::<i16>::new();
+    siggen.set_wavetable(&SINE_I16);
+    siggen.set_freq(440);
     siggen.set_samplerate(100);
-    for x in 0..110 {
-        let y = siggen.next();
-        print!("{}: {}\n", x, (y as f64) / (i32::MAX as f64));
-    }
+    siggen.set_repeat(false);
+    siggen.start();
+
+    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+
+    let _result = stream_handle.play_raw(siggen.convert_samples());
+
+    std::thread::sleep(std::time::Duration::from_secs(5));
+
+    // for x in 0..110 {
+    //     let _y = siggen.next();
+    //     match _y {
+    //         Some(y) => println!("{}: {}\n", x, (y as f64) / (i16::MAX as f64)),
+    //         None => {
+    //             println!("Generator stopped at {}", x);
+    //             break;
+    //         }
+    //     }
+    // }
 }
