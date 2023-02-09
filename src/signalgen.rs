@@ -46,7 +46,8 @@ impl<T> SignalGenerator<T> {
     }
 
     fn update_delta_phi(&mut self) {
-        self.delta_phi = ((self.mfreq as i32) * self.phi_max) / (self.msample_rate as i32);
+        self.delta_phi =
+            (((self.mfreq as i64) * (self.phi_max as i64)) / (self.msample_rate as i64)) as i32;
     }
 
     /// Set repeat to true or false
@@ -157,7 +158,7 @@ impl Iterator for SignalGenerator<i32> {
     type Item = i32;
 
     fn next(&mut self) -> Option<Self::Item> {
-        return self._next();
+        self._next()
     }
 }
 
@@ -211,7 +212,7 @@ impl Iterator for SignalGenerator<i16> {
     type Item = i16;
 
     fn next(&mut self) -> Option<Self::Item> {
-        return self._next();
+        self._next()
     }
 }
 

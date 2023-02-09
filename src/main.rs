@@ -2,7 +2,7 @@ use core::time::Duration;
 use rain::{
     linexp::LinExp,
     signalgen::{self, SignalGenerator},
-    wavetables::{SINE_I16, SINE_I32},
+    wavetables::SINE_I16,
 };
 use rodio::{source::Source, OutputStream};
 
@@ -18,23 +18,23 @@ fn main() {
     //     print!("{:?}\n", linexp.y(x));
     // }
 
-    let mut siggen = SignalGenerator::<i16>::new();
-    siggen.set_wavetable(&SINE_I16);
-    siggen.set_freq(440);
-    siggen.set_samplerate(100);
-    siggen.set_repeat(false);
-    siggen.start();
+    let mut sine = SignalGenerator::<i16>::new();
+    sine.set_wavetable(&SINE_I16);
+    sine.set_freq(440);
+    sine.set_samplerate(44100);
+    sine.set_repeat(true);
+    sine.start();
 
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
 
-    let _result = stream_handle.play_raw(siggen.convert_samples());
+    let _result = stream_handle.play_raw(sine.convert_samples());
 
-    std::thread::sleep(std::time::Duration::from_secs(5));
+    std::thread::sleep(std::time::Duration::from_secs(1));
 
     // for x in 0..110 {
     //     let _y = siggen.next();
     //     match _y {
-    //         Some(y) => println!("{}: {}\n", x, (y as f64) / (i16::MAX as f64)),
+    //         Some(y) => println!("{}: {}, {}\n", x, (y as f64) / (i16::MAX as f64), y),
     //         None => {
     //             println!("Generator stopped at {}", x);
     //             break;
