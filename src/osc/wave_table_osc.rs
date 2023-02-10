@@ -23,7 +23,7 @@ impl Frequency<u32> for u32 {
 }
 
 /// Stateful wavetable signal generator
-pub struct SignalGenerator<T: 'static> {
+pub struct WaveTableOscillator<T: 'static> {
     repeat: bool,
     running: bool,
 
@@ -40,7 +40,7 @@ pub struct SignalGenerator<T: 'static> {
     idx_max: usize,
 }
 
-impl<T> SignalGenerator<T> {
+impl<T> WaveTableOscillator<T> {
     fn update_idx(&mut self) {
         self.idx = (((self.idx_max as i32) * self.phi) / self.phi_max) as usize;
     }
@@ -98,18 +98,18 @@ impl<T> SignalGenerator<T> {
         self.update_delta_phi();
     }
 
-    pub fn set_msamplerate(&mut self, msample_rate: u32) {
+    pub fn set_msample_rate(&mut self, msample_rate: u32) {
         self.msample_rate = msample_rate;
         self.update_delta_phi();
     }
 
-    pub fn set_samplerate(&mut self, sample_rate: u32) {
+    pub fn set_sample_rate(&mut self, sample_rate: u32) {
         self.msample_rate = sample_rate.to_mHz();
         self.update_delta_phi();
     }
 }
 
-impl SignalGenerator<i32> {
+impl WaveTableOscillator<i32> {
     pub fn new() -> Self {
         Self {
             repeat: true,
@@ -154,7 +154,7 @@ impl SignalGenerator<i32> {
     }
 }
 
-impl Iterator for SignalGenerator<i32> {
+impl Iterator for WaveTableOscillator<i32> {
     type Item = i32;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -162,7 +162,7 @@ impl Iterator for SignalGenerator<i32> {
     }
 }
 
-impl SignalGenerator<i16> {
+impl WaveTableOscillator<i16> {
     pub fn new() -> Self {
         Self {
             repeat: true,
@@ -208,7 +208,7 @@ impl SignalGenerator<i16> {
     }
 }
 
-impl Iterator for SignalGenerator<i16> {
+impl Iterator for WaveTableOscillator<i16> {
     type Item = i16;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -218,7 +218,7 @@ impl Iterator for SignalGenerator<i16> {
 
 use core::time::Duration;
 use rodio::source::Source;
-impl Source for SignalGenerator<i16> {
+impl Source for WaveTableOscillator<i16> {
     fn channels(&self) -> u16 {
         return 1;
     }
@@ -236,21 +236,24 @@ impl Source for SignalGenerator<i16> {
     }
 }
 
+pub type WaveTableOsc16 = WaveTableOscillator<i16>;
+pub type WaveTableOsc32 = WaveTableOscillator<i32>;
+
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::wavetables::SINE_I16;
+    use crate::osc::wave_tables::SINE_I16;
 
     #[test]
-    fn test_signal_generator() {
-        let mut siggen = SignalGenerator::<i16>::new();
-        siggen.set_wavetable(&SINE_I16);
-        siggen.set_freq(2);
-        siggen.set_samplerate(100);
-        siggen.set_repeat(false);
-        siggen.start();
+    fn test_wave_table_oscillator() {
+        let mut osc = WaveTableOscillator::<i16>::new();
+        osc.set_wavetable(&SINE_I16);
+        osc.set_freq(2);
+        osc.set_sample_rate(100);
+        osc.set_repeat(false);
+        osc.start();
         for x in 0..110 {
-            let _y = siggen._next();
+            let _y = osc._next();
             match _y {
                 Some(y) => println!("{}: {}\n", x, (y as f64) / (i32::MAX as f64)),
                 None => {

@@ -1,9 +1,5 @@
 use core::time::Duration;
-use rain::{
-    linexp::LinExp,
-    signalgen::{self, SignalGenerator},
-    wavetables::SINE_I16,
-};
+use rain::{linexp::LinExp, osc::wave_table_osc::WaveTableOsc16, osc::wave_tables::SINE_I16};
 use rodio::{source::Source, OutputStream};
 
 fn main() {
@@ -18,10 +14,10 @@ fn main() {
     //     print!("{:?}\n", linexp.y(x));
     // }
 
-    let mut sine = SignalGenerator::<i16>::new();
+    let mut sine = WaveTableOsc16::new();
     sine.set_wavetable(&SINE_I16);
     sine.set_freq(440);
-    sine.set_samplerate(44100);
+    sine.set_sample_rate(44100);
     sine.set_repeat(true);
     sine.start();
 
@@ -32,7 +28,7 @@ fn main() {
     std::thread::sleep(std::time::Duration::from_secs(1));
 
     // for x in 0..110 {
-    //     let _y = siggen.next();
+    //     let _y = osc.next();
     //     match _y {
     //         Some(y) => println!("{}: {}, {}\n", x, (y as f64) / (i16::MAX as f64), y),
     //         None => {

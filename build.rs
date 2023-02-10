@@ -5,7 +5,7 @@ use std::fmt::Display;
 use std::{fs, path::Path};
 
 /// Directory used to store wavetable files generated during compile time
-const WAVETABLES_DIRECTORY: &str = "wavetables/";
+const WAVETABLES_DIRECTORY: &str = "src/osc/wave_tables/";
 
 struct Wavetable<T> {
     table: Vec<T>,
