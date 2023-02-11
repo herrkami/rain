@@ -50,6 +50,35 @@ impl<T> WaveTableOscillator<T> {
             (((self.mfreq as i64) * (self.phi_max as i64)) / (self.msample_rate as i64)) as i32;
     }
 
+    /// Increments phase accumulator and returns either the next sample or None
+    /// if the generator is not running
+    #[inline]
+    pub fn _next(&mut self) -> Option<T>
+    where
+        T: Copy,
+    {
+        self.phi += self.delta_phi;
+        if self.phi > self.phi_max {
+            self.phi -= self.phi_max;
+            if !self.repeat {
+                self.stop_and_reset();
+            }
+        };
+        if self.is_running() {
+            self.update_idx();
+            let out = self.wavetable[self.idx];
+            Some(out)
+        } else {
+            None
+        }
+    }
+
+    /// Set the wavetable
+    pub fn set_wavetable(&mut self, wavetable: &'static [T]) {
+        self.wavetable = wavetable;
+        self.idx_max = self.wavetable.len();
+    }
+
     /// Set repeat to true or false
     pub fn set_repeat(&mut self, repeat: bool) {
         self.repeat = repeat;
@@ -128,30 +157,6 @@ impl WaveTableOscillator<i32> {
             idx_max: 0,
         }
     }
-
-    /// Increments phase accumulator and returns either the next sample or None
-    /// if the generator is not running
-    pub fn _next(&mut self) -> Option<i32> {
-        self.phi += self.delta_phi;
-        if self.phi > self.phi_max {
-            self.phi -= self.phi_max;
-            if !self.repeat {
-                self.stop_and_reset();
-            }
-        };
-        if self.is_running() {
-            self.update_idx();
-            Some(self.wavetable[self.idx])
-        } else {
-            None
-        }
-    }
-
-    /// Set the wavetable
-    pub fn set_wavetable(&mut self, wavetable: &'static [i32]) {
-        self.wavetable = wavetable;
-        self.idx_max = self.wavetable.len();
-    }
 }
 
 impl Iterator for WaveTableOscillator<i32> {
@@ -181,36 +186,12 @@ impl WaveTableOscillator<i16> {
             idx_max: 0,
         }
     }
-
-    /// Increments phase accumulator and returns either the next sample or None
-    /// if the generator is not running
-    pub fn _next(&mut self) -> Option<i16> {
-        self.phi += self.delta_phi;
-        if self.phi > self.phi_max {
-            self.phi -= self.phi_max;
-            if !self.repeat {
-                self.stop_and_reset();
-            }
-        };
-        if self.is_running() {
-            self.update_idx();
-            let out = self.wavetable[self.idx];
-            Some(out)
-        } else {
-            None
-        }
-    }
-
-    /// Set the wavetable
-    pub fn set_wavetable(&mut self, wavetable: &'static [i16]) {
-        self.wavetable = wavetable;
-        self.idx_max = self.wavetable.len();
-    }
 }
 
 impl Iterator for WaveTableOscillator<i16> {
     type Item = i16;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self._next()
     }
